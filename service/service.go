@@ -1,9 +1,9 @@
 package service
 
 import (
-	"career-compass-go/config"
 	"career-compass-go/pkg/logging"
 	"career-compass-go/utils"
+	"context"
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,7 +15,7 @@ import (
 func CheckExistingDocument(coll *mongo.Collection, filter bson.D) (bool, error) {
 	var res any
 
-	err := coll.FindOne(config.MongoCtx, filter).Decode(&res)
+	err := coll.FindOne(context.TODO(), filter).Decode(&res)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil

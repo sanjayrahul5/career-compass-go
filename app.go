@@ -23,8 +23,8 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	defer setting.CloseMongoClient(config.MongoClient, config.MongoCtx, config.MongoCancelFunc)
-	err := setting.Ping(config.MongoClient, config.MongoCtx)
+	defer setting.CloseMongoClient(config.MongoClient)
+	err := setting.Ping(config.MongoClient)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error connecting to mongo -> %s", err.Error()))
 		return
