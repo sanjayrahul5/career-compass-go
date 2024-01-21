@@ -1,31 +1,32 @@
 package handlers
 
 import (
+	"career-compass-go/auth"
 	"career-compass-go/config"
 	"career-compass-go/mailer"
-	"career-compass-go/models"
 	"career-compass-go/pkg/logging"
 	"career-compass-go/service"
 	"career-compass-go/utils"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"runtime"
 )
 
 // Signup is the handler for new user registration
 func Signup(c *gin.Context) {
-	var form models.User
+	var user service.User
 
-	err := c.ShouldBind(&form)
+	err := c.ShouldBind(&user)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	existingUser, err := service.CheckExistingDocument(config.UserCollection, bson.D{{"email", form.Email}})
+	existingUser, err := user.CheckExistingUser()
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error checking for existing user -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -43,7 +44,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	err = mailer.SendMail(config.MailOTP, form.Email, otp)
+	err = mailer.SendMail(config.MailOTP, user.Email, otp)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error sending otp mail to the user -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -53,6 +54,37 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"otp": otp}})
 }
 
+// Login is the handler for user login
 func Login(c *gin.Context) {
+	var user service.User
 
+	err := c.ShouldBind(&user)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = user.Get()
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), config.UnauthorizedLoginMsg)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": config.UnauthorizedLoginMsg})
+			return
+		}
+
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error checking for existing user -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+
+	}
+
+	token, err := auth.GenerateToken(user.ID.Hex())
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error generating JWT token -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role}})
 }

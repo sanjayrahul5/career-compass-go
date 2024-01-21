@@ -9,13 +9,14 @@ import (
 var (
 	ViperConfig *viper.Viper
 
-	MongoClient     *mongo.Client
-
+	MongoClient    *mongo.Client
 	MongoDBName    string
 	UserCollection *mongo.Collection
 
 	TransportEmail         string
 	TransportEmailPassword string
+
+	JWTSecret string
 )
 
 func init() {
@@ -32,4 +33,5 @@ func init() {
 
 	TransportEmail = ViperConfig.GetString("TRANSPORT_EMAIL")
 	TransportEmailPassword = ViperConfig.GetString("TRANSPORT_EMAIL_PASSWORD")
+	JWTSecret = ViperConfig.GetString("JWT_SECRET")
 }
