@@ -7,8 +7,8 @@ import (
 
 var Logger *logrus.Logger
 
-// InitializeLogger creates a new instance for the global logger
-func InitializeLogger() {
+// Setup creates a new instance for the global logger
+func Setup() {
 	Logger = logrus.New()
 
 	if config.ViperConfig.GetString("RUN_MODE") == "release" {

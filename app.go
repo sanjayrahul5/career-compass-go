@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	logging.Setup()
 	setting.Setup()
 }
 
@@ -37,9 +38,8 @@ func main() {
 		MaxAge:         5,
 	})
 
-
 	server := &http.Server{
-		Addr: port,
+		Addr:    port,
 		Handler: c.Handler(routers.SetupRouter()),
 	}
 

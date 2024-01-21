@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"career-compass-go/handlers"
 	"career-compass-go/middlewares"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +16,10 @@ func SetupRouter() *gin.Engine {
 
 	router.GET("/readyz", func(c *gin.Context) { c.Status(http.StatusOK) })
 	router.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
-	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong" )})
+	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+
+	router.POST("/signup", handlers.Signup)
+	router.POST("/signin", handlers.Login)
 
 	return router
 }

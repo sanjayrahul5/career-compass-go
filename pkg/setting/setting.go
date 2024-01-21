@@ -6,28 +6,16 @@ import (
 	"career-compass-go/utils"
 	"context"
 	"fmt"
-	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
 	"runtime"
 	"time"
 )
 
 // Setup sets up the project dependency configurations
 func Setup() {
-	viper.AutomaticEnv()
-	viper.SetConfigName("app")
-	viper.AddConfigPath("config/")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	config.ViperConfig = viper.GetViper()
-
-	logging.InitializeLogger()
+	var err error
 
 	// Connect to mongo cluster
 	mongoUri := config.ViperConfig.GetString("MONGO_URI")
@@ -37,12 +25,14 @@ func Setup() {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Failed to establish connection to mongo -> %s", err.Error()))
 		panic(err)
 	}
+
+	config.UserCollection = config.MongoClient.Database(config.MongoDBName).Collection(config.ViperConfig.GetString("USER_COLLECTION"))
 }
 
 // ConnectToMongo establishes a client connection to the given mongoDB URI
 func ConnectToMongo(uri string) (*mongo.Client, context.Context, context.CancelFunc, error) {
 	serverApi := options.ServerAPI(options.ServerAPIVersion1)
-	ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri).SetServerAPIOptions(serverApi))
 	if err != nil {

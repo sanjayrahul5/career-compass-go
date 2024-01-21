@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"career-compass-go/config"
+	"crypto/rand"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -18,4 +21,31 @@ func GetFrame(function uintptr, file string, line int, _ bool) string {
 	}
 
 	return fmt.Sprintf("[%s][%s][%d] ", absPath, funcName, line)
+}
+
+// GenerateOTP generates an otp of given length
+func GenerateOTP(length int) (string, error) {
+	buffer := make([]byte, length)
+
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return "", err
+	}
+
+	otpCharsLength := len(config.OTPChars)
+	for i := 0; i < length; i++ {
+		buffer[i] = config.OTPChars[int(buffer[i])%otpCharsLength]
+	}
+
+	return string(buffer), nil
+}
+
+func Hash(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func Verify(hashed, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	return err == nil
 }
