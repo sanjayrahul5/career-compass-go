@@ -10,6 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"runtime"
@@ -34,8 +36,8 @@ func Signup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	} else if existingUser {
-		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), config.ExistingUserMsg)
-		c.JSON(http.StatusConflict, gin.H{"error": config.ExistingUserMsg})
+		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("User already exists for email -> %s", user.Email))
+		c.JSON(http.StatusConflict, gin.H{"error": "User with this email already exists"})
 		return
 	}
 
@@ -74,6 +76,64 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"userID": user.ID}})
 }
 
+func SignupCallback(c *gin.Context) {
+	userID := c.Query("userID")
+	otpEntered := c.Query("otp")
+
+	// Convert userID hex to object
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing userID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user service.User
+	user.ID = objectID
+
+	// Check if the user document is expired
+	filters := []bson.E{
+		{"_id", objectID},
+	}
+
+	err = user.Get(filters)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("No user found with userID -> %s", userID))
+			c.JSON(http.StatusNotFound, gin.H{"error": "OTP expired for the user"})
+			return
+		}
+
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting user document -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if opt matches
+	if user.OTP == otpEntered {
+		// Remove otp and expiry field from the user's document
+		updateFields := bson.D{
+			{"$unset", bson.D{
+				{"otp", ""},
+				{"expire_at", ""},
+			}},
+		}
+
+		err = user.Update(filters, updateFields)
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error removing otp and expiry fields from user document -> %s", err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), "Entered otp does not match with the stored otp")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "The OTP entered is incorrect"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "User registered successfully"})
+}
+
 // Login is the handler for user login
 func Login(c *gin.Context) {
 	var user service.User
@@ -85,11 +145,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	err = user.Get()
+	// Check if user exists
+	filters := []bson.E{
+		{"email", user.Email},
+	}
+
+	err = user.Get(filters)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), config.UnauthorizedLoginMsg)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": config.UnauthorizedLoginMsg})
+			logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("No user registered with the email -> %s", user.Email))
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Email or password entered is incorrect"})
 			return
 		}
 
@@ -99,6 +164,7 @@ func Login(c *gin.Context) {
 
 	}
 
+	// Generate auth token
 	token, err := auth.GenerateToken(user.ID.Hex())
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error generating JWT token -> %s", err.Error()))

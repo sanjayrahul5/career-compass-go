@@ -25,17 +25,6 @@ type User struct {
 	ExpireAt time.Time          `bson:"expire_at,omitempty"`
 }
 
-// Get finds and returns the user document
-func (us *User) Get() error {
-	err := config.UserCollection.FindOne(context.TODO(), bson.D{{"email", us.Email}}).Decode(us)
-	if err != nil {
-		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error finding user document -> %s", err.Error()))
-		return err
-	}
-
-	return nil
-}
-
 func (us *User) Create() error {
 	res, err := config.UserCollection.InsertOne(context.TODO(), us)
 	if err != nil {
@@ -45,6 +34,27 @@ func (us *User) Create() error {
 
 	us.ID = res.InsertedID.(primitive.ObjectID)
 	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created userID -> %s", us.ID.Hex()))
+
+	return nil
+}
+
+// Get finds and returns the user document
+func (us *User) Get(filters []bson.E) error {
+	err := config.UserCollection.FindOne(context.TODO(), bson.D(filters)).Decode(us)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error finding user document -> %s", err.Error()))
+		return err
+	}
+
+	return nil
+}
+
+func (us *User) Update(filters []bson.E, update bson.D) error {
+	_, err := config.UserCollection.UpdateOne(context.TODO(), bson.D(filters), update)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error updating user document -> %s", err.Error()))
+		return err
+	}
 
 	return nil
 }

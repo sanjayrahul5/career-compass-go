@@ -19,6 +19,7 @@ func SetupRouter() *gin.Engine {
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 
 	router.POST("/signup", handlers.Signup)
+	router.PUT("/signup/callback", handlers.SignupCallback)
 	router.POST("/signin", handlers.Login)
 
 	return router

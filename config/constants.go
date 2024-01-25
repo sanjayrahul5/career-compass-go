@@ -10,8 +10,5 @@ const (
 	OPTLength = 6
 	MailOTP   = "MailOTP"
 
-	ExistingUserMsg      = "User with this email already exists"
-	UnauthorizedLoginMsg = "Email or password entered is incorrect"
-
 	UserRole = "user"
 )
