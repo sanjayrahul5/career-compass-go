@@ -25,6 +25,7 @@ type User struct {
 	ExpireAt time.Time          `bson:"expire_at,omitempty"`
 }
 
+// Create inserts a new user document
 func (us *User) Create() error {
 	res, err := config.UserCollection.InsertOne(context.TODO(), us)
 	if err != nil {
@@ -49,6 +50,7 @@ func (us *User) Get(filters []bson.E) error {
 	return nil
 }
 
+// Update updates the user document based on the given update query
 func (us *User) Update(filters []bson.E, update bson.D) error {
 	_, err := config.UserCollection.UpdateOne(context.TODO(), bson.D(filters), update)
 	if err != nil {

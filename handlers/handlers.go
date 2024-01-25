@@ -76,6 +76,7 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"userID": user.ID}})
 }
 
+// SignupCallback is the handler for otp verification and post user registration actions
 func SignupCallback(c *gin.Context) {
 	userID := c.Query("userID")
 	otpEntered := c.Query("otp")
@@ -99,7 +100,7 @@ func SignupCallback(c *gin.Context) {
 	err = user.Get(filters)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("No user found with userID -> %s", userID))
+			logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("OTP expired for the userID -> %s", userID))
 			c.JSON(http.StatusNotFound, gin.H{"error": "OTP expired for the user"})
 			return
 		}
@@ -126,7 +127,7 @@ func SignupCallback(c *gin.Context) {
 			return
 		}
 	} else {
-		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), "Entered otp does not match with the stored otp")
+		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), "Entered otp does not match with the stored otp")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "The OTP entered is incorrect"})
 		return
 	}
@@ -145,6 +146,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	inputPassword := user.Password
+
 	// Check if user exists
 	filters := []bson.E{
 		{"email", user.Email},
@@ -162,6 +165,13 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 
+	}
+
+	isValid := utils.VerifyPasswordHash(inputPassword, user.Password)
+	if !isValid {
+		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Failed password verification for user -> %s", user.Email))
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email or password entered is incorrect"})
+		return
 	}
 
 	// Generate auth token

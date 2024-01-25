@@ -40,11 +40,13 @@ func GenerateOTP(length int) (string, error) {
 	return string(buffer), nil
 }
 
+// HashPassword creates an encrypted hash for the given password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
+// VerifyPasswordHash verifies if the hash and the password string matches
 func VerifyPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
