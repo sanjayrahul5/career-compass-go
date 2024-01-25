@@ -10,7 +10,7 @@ import (
 )
 
 // SendMail sends a mail using SMTP server
-func SendMail(mailTopic string, mail string, data any) error {
+func SendMail(mailTopic string, mail string, data any) {
 	m := gomail.NewMessage()
 
 	m.SetHeader("From", config.TransportEmail)
@@ -31,11 +31,9 @@ func SendMail(mailTopic string, mail string, data any) error {
 
 	err := dialer.DialAndSend(m)
 	if err != nil {
-		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error sending email -> %s", err.Error()))
-		return err
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error sending mail -> %s", err.Error()))
+		return
 	}
 
-	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), "Email sent successfully!")
-
-	return nil
+	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), "Mail sent successfully!")
 }

@@ -6,10 +6,12 @@ import (
 	"career-compass-go/utils"
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"runtime"
+	"strings"
 )
 
 // Setup sets up the project dependency configurations
@@ -26,6 +28,8 @@ func Setup() {
 	}
 
 	config.UserCollection = config.MongoClient.Database(config.MongoDBName).Collection(config.ViperConfig.GetString("USER_COLLECTION"))
+
+	go CreateTTLIndexForUsers()
 }
 
 // ConnectToMongo establishes a client connection to the given mongoDB URI
@@ -60,4 +64,24 @@ func Ping(client *mongo.Client) error {
 
 	logging.Logger.Info("Connected to MongoDB...")
 	return nil
+}
+
+// CreateTTLIndexForUsers creates TTL for otp expiration handling in users collection
+func CreateTTLIndexForUsers() {
+	indexName := "expire_at_1"
+	expireAfterSeconds := int32(config.TTLIndexExpirySeconds)
+
+	index := mongo.IndexModel{
+		Keys:    bson.D{{Key: "expire_at", Value: 1}},
+		Options: options.Index().SetName(indexName).SetExpireAfterSeconds(expireAfterSeconds),
+	}
+
+	_, err := config.UserCollection.Indexes().CreateOne(context.TODO(), index)
+	if err != nil {
+		if strings.Contains(err.Error(), "An equivalent index already exists with the same name but different options") {
+			logging.Logger.Warning(utils.GetFrame(runtime.Caller(0)), "TTL index already exists for users collection... Skipping TTL index creation")
+		} else {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating user TTL index -> %s", err.Error()))
+		}
+	}
 }

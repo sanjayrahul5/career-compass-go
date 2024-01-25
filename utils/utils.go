@@ -40,12 +40,12 @@ func GenerateOTP(length int) (string, error) {
 	return string(buffer), nil
 }
 
-func Hash(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-func Verify(hashed, password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+func VerifyPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

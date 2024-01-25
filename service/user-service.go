@@ -11,15 +11,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"runtime"
+	"time"
 )
 
 // User collection schema
 type User struct {
-	ID       primitive.ObjectID `bson:"_id"`
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
 	Username string             `bson:"username"`
 	Email    string             `bson:"email"`
 	Password string             `bson:"password"`
 	Role     string             `bson:"role"`
+	OTP      string             `bson:"otp,omitempty"`
+	ExpireAt time.Time          `bson:"expire_at,omitempty"`
 }
 
 // Get finds and returns the user document
@@ -29,6 +32,19 @@ func (us *User) Get() error {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error finding user document -> %s", err.Error()))
 		return err
 	}
+
+	return nil
+}
+
+func (us *User) Create() error {
+	res, err := config.UserCollection.InsertOne(context.TODO(), us)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error inserting new user document -> %s", err.Error()))
+		return err
+	}
+
+	us.ID = res.InsertedID.(primitive.ObjectID)
+	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created userID -> %s", us.ID.Hex()))
 
 	return nil
 }

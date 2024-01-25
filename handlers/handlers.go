@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"runtime"
+	"time"
 )
 
 // Signup is the handler for new user registration
@@ -26,6 +27,7 @@ func Signup(c *gin.Context) {
 		return
 	}
 
+	// Check if the user already exists
 	existingUser, err := user.CheckExistingUser()
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error checking for existing user -> %s", err.Error()))
@@ -37,6 +39,15 @@ func Signup(c *gin.Context) {
 		return
 	}
 
+	// Encrypt password
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error hashing password -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Generate OTP
 	otp, err := utils.GenerateOTP(config.OPTLength)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error generating otp -> %s", err.Error()))
@@ -44,14 +55,23 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	err = mailer.SendMail(config.MailOTP, user.Email, otp)
+	user.Password = hashedPassword
+	user.OTP = otp
+	user.Role = config.UserRole
+	user.ExpireAt = time.Now().Add(config.OTPExpiryTime)
+
+	// Create user with OTP and expiry time
+	err = user.Create()
 	if err != nil {
-		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error sending otp mail to the user -> %s", err.Error()))
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating new user -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"otp": otp}})
+	// Send OTP via email
+	go mailer.SendMail(config.MailOTP, user.Email, otp)
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"userID": user.ID}})
 }
 
 // Login is the handler for user login
