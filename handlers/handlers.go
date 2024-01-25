@@ -167,6 +167,7 @@ func Login(c *gin.Context) {
 
 	}
 
+	// Validate the password
 	isValid := utils.VerifyPasswordHash(inputPassword, user.Password)
 	if !isValid {
 		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Failed password verification for user -> %s", user.Email))
