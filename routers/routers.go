@@ -20,6 +20,9 @@ func SetupRouter() *gin.Engine {
 
 	router.POST("/signup", handlers.Signup)
 	router.PUT("/signup/callback", handlers.SignupCallback)
+
+	router.PUT("/reset-password", handlers.ResetPassword)
+
 	router.POST("/signin", handlers.Login)
 
 	return router

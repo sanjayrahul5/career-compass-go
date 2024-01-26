@@ -135,6 +135,60 @@ func SignupCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": "User registered successfully"})
 }
 
+// ResetPassword is the handler for resetting the user passwords
+func ResetPassword(c *gin.Context) {
+	var user service.User
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newPassword := user.Password
+
+	// Check if the user exists
+	existingUser, err := user.CheckExistingUser()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error checking for existing user -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	} else if !existingUser {
+		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("No user registered with the email -> %s", user.Email))
+		c.JSON(http.StatusNotFound, gin.H{"error": "User with this email does not exists"})
+		return
+	}
+
+	// Encrypt new password
+	newHashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error hashing password -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update new password
+	filters := []bson.E{
+		{"email", user.Email},
+	}
+
+	updateFields := bson.D{
+		{"$set", bson.D{
+			{"password", newHashedPassword},
+		}},
+	}
+
+	err = user.Update(filters, updateFields)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error updating the new resetted password -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "Password reset successful"})
+}
+
 // Login is the handler for user login
 func Login(c *gin.Context) {
 	var user service.User
