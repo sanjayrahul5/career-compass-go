@@ -3,7 +3,7 @@ package config
 import "time"
 
 const (
-	TTLIndexExpirySeconds = 30 * 60
+	TTLIndexExpirySeconds = 10 * 60
 	OTPExpiryTime         = time.Minute * 10
 
 	OTPChars  = "1234567890"
