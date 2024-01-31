@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"bytes"
 	"career-compass-go/config"
 	"career-compass-go/pkg/logging"
 	"career-compass-go/utils"
@@ -13,20 +14,33 @@ import (
 func SendMail(mailTopic string, mail string, data any) {
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", config.TransportEmail)
+	m.SetHeader("From", config.SMTPEmail)
 	m.SetHeader("To", mail)
 
 	switch mailTopic {
 	case config.MailOTP:
+		var body bytes.Buffer
+
+		err := config.Templates.ExecuteTemplate(&body, "otpTemplate.html", struct {
+			OTP string
+		}{
+			OTP: data.(string),
+		})
+
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error executing otp mail template -> %s", err.Error()))
+			return
+		}
+
 		m.SetHeader("Subject", "Career Compass - OTP Authentication")
-		m.SetBody("text/plain", fmt.Sprintf("Your OTP for signup is %s", data.(string)))
+		m.SetBody("text/html", body.String())
 	}
 
 	dialer := gomail.NewDialer(
-		"smtp.gmail.com",
-		587,
-		config.TransportEmail,
-		config.TransportEmailPassword,
+		config.SMTPHost,
+		config.SMTPPort,
+		config.SMTPEmail,
+		config.SMTPPassword,
 	)
 
 	err := dialer.DialAndSend(m)

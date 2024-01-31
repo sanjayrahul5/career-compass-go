@@ -7,7 +7,9 @@ MONGO_URI = "mongodb://localhost:27017/"
 DB_NAME = "careerCompass"
 USER_COLLECTION = "users"
 
-TRANSPORT_EMAIL = "interxview@gmail.com"
-TRANSPORT_EMAIL_PASSWORD = ""
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 587
+SMTP_EMAIL = "interxview@gmail.com"
+SMTP_PASSWORD = ""
 
 JWT_SECRET = ""
