@@ -239,3 +239,91 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role}})
 }
+
+// GetAllRoles is the handler for fetching all the role details
+func GetAllRoles(c *gin.Context) {
+	var role service.Role
+
+	// Get all role details
+	response, err := role.GetAll()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the role details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
+}
+
+// GetRole is the handler for fetching role details
+func GetRole(c *gin.Context) {
+	roleID := c.Param("id")
+
+	// Convert roleID hex to object
+	objectID, err := primitive.ObjectIDFromHex(roleID)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing roleID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get the role details
+	filter := []bson.E{
+		{"_id", objectID},
+	}
+
+	var role service.Role
+
+	err = role.Get(filter)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting role details for role [%s] -> %s", roleID, err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": role})
+}
+
+// GetAllSkills is the handler for fetching all the skill details
+func GetAllSkills(c *gin.Context) {
+	var skill service.Skill
+
+	// Get all skill details
+	response, err := skill.GetAll()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the skill details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
+}
+
+// GetSkill is the handler for fetching skill details
+func GetSkill(c *gin.Context) {
+	skillID := c.Param("id")
+
+	// Convert skillID hex to object
+	objectID, err := primitive.ObjectIDFromHex(skillID)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing skillID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get the skill details
+	filter := []bson.E{
+		{"_id", objectID},
+	}
+
+	var skill service.Skill
+
+	err = skill.Get(filter)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting skill details for skill [%s] -> %s", skillID, err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": skill})
+}

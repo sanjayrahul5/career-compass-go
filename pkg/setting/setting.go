@@ -27,7 +27,11 @@ func Setup() {
 		panic(err)
 	}
 
-	config.UserCollection = config.MongoClient.Database(config.MongoDBName).Collection(config.ViperConfig.GetString("USER_COLLECTION"))
+	config.MongoDBConn = config.MongoClient.Database(config.MongoDBName)
+
+	config.UserCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("USER_COLLECTION"))
+	config.RoleCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("ROLE_COLLECTION"))
+	config.SkillCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("SKILL_COLLECTION"))
 
 	go CreateTTLIndexForUsers()
 }

@@ -25,5 +25,11 @@ func SetupRouter() *gin.Engine {
 
 	router.POST("/signin", handlers.Login)
 
+	router.GET("/role", handlers.GetAllRoles)
+	router.GET("/:id/role", handlers.GetRole)
+
+	router.GET("/skill", handlers.GetAllSkills)
+	router.GET("/:id/skill", handlers.GetSkill)
+
 	return router
 }

@@ -11,14 +11,17 @@ import (
 var (
 	ViperConfig *viper.Viper
 
-	MongoClient    *mongo.Client
-	MongoDBName    string
-	UserCollection *mongo.Collection
+	MongoClient     *mongo.Client
+	MongoDBName     string
+	MongoDBConn     *mongo.Database
+	UserCollection  *mongo.Collection
+	RoleCollection  *mongo.Collection
+	SkillCollection *mongo.Collection
 
 	Templates *template.Template
 
-	SMTPHost string
-	SMTPPort int
+	SMTPHost     string
+	SMTPPort     int
 	SMTPEmail    string
 	SMTPPassword string
 

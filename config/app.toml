@@ -6,6 +6,9 @@ MONGO_URI = "mongodb://localhost:27017/"
 
 DB_NAME = "careerCompass"
 USER_COLLECTION = "users"
+ROLE_COLLECTION = "roles"
+SKILL_COLLECTION = "skills"
+
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
