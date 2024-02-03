@@ -24,9 +24,9 @@ jobs:
       - run:
           name: Build and push Docker image
           command: |
-            docker build -t godemo.azurecr.io/go-demo:latest .
-            docker login -u $DOCKER_USER -p $DOCKER_PASS godemo.azurecr.io
-            docker push godemo.azurecr.io/go-demo:latest
+            docker build -t gocareercompass.azurecr.io/gocareercompass:latest .
+            docker login -u $DOCKER_USER -p $DOCKER_PASS gocareercompass.azurecr.io
+            docker push gocareercompass.azurecr.io/gocareercompass:latest
 workflows:
   test-and-deploy:
     jobs:
