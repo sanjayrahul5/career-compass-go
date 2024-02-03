@@ -5,7 +5,7 @@ jobs:
   build-and-run-test:
     executor:
       name: go/default
-      tag: "1.16"
+      tag: "1.21.3"
     steps:
       - checkout
       - go/load-cache
@@ -16,7 +16,7 @@ jobs:
           command: go test -v
   build-docker-image:
     docker:
-      - image: golang:1.21-alpine3.18
+      - image: golang:1.21.3-alpine3.18
     steps:
       - checkout
       - run:
