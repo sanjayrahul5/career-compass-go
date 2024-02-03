@@ -1,6 +1,6 @@
 PORT = 8080
 
-RUN_MODE = "release"
+RUN_MODE = "develop"
 
 MONGO_URI = "mongodb://localhost:27017/"
 
