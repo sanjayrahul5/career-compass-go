@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine3.18
+FROM golang:1.21.3-alpine3.18
 
 RUN mkdir /career-compass
 

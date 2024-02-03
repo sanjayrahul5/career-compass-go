@@ -16,7 +16,7 @@ jobs:
           command: go test -v
   build-docker-image:
     docker:
-      - image: golang:1.21.3-alpine3.18
+      - image: cimg/go:1.21.3
     steps:
       - checkout
       - run:
