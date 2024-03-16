@@ -230,7 +230,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Generate auth token
-	token, err := auth.GenerateToken(user.ID.Hex())
+	token, err := auth.GenerateToken(user.ID.Hex(), user.Email)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error generating JWT token -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

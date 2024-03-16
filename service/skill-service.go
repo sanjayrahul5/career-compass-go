@@ -13,10 +13,11 @@ import (
 
 // Skill collection schema
 type Skill struct {
-	ID         primitive.ObjectID   `json:"skillID" bson:"_id, omitempty"`
+	ID         primitive.ObjectID   `json:"skillID" bson:"_id,omitempty"`
 	RoleIDs    []primitive.ObjectID `json:"-" bson:"role_ids"`
 	SkillName  string               `json:"skillName" bson:"skill_name"`
 	SkillImage string               `json:"skillImage" bson:"skill_image"`
+	Roles      []Role               `json:"roles,omitempty"`
 }
 
 // Get gets the skill document based on the given filter

@@ -11,12 +11,13 @@ import (
 )
 
 // GenerateToken generates a signed JWT token for the user session
-func GenerateToken(userID string) (string, error) {
+func GenerateToken(userID, email string) (string, error) {
 	secretKey := []byte(config.JWTSecret)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"userID": userID,
+			"email":  email,
 			"exp":    time.Now().Add(time.Minute * 30).Unix(),
 		})
 
