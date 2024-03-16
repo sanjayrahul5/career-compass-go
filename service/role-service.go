@@ -13,8 +13,10 @@ import (
 
 // Role collection schema
 type Role struct {
-	ID          primitive.ObjectID `json:"roleID" bson:"_id, omitempty"`
-	PlaceHolder string             `json:"placeHolder" bson:"place_holder"`
+	ID        primitive.ObjectID   `json:"roleID" bson:"_id, omitempty"`
+	SkillIDs  []primitive.ObjectID `json:"-" bson:"skill_ids"`
+	RoleName  string               `json:"roleName" bson:"role_name"`
+	RoleImage string               `json:"roleImage" bson:"role_image"`
 }
 
 // Get gets the role document based on the given filter

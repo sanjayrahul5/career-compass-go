@@ -245,14 +245,23 @@ func GetAllRoles(c *gin.Context) {
 	var role service.Role
 
 	// Get all role details
-	response, err := role.GetAll()
+	allRoles, err := role.GetAll()
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the role details -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": response})
+	responseRoles := make([]service.Role, len(allRoles))
+	for index, r := range allRoles {
+		responseRoles[index] = service.Role{
+			ID:        r.ID,
+			RoleName:  r.RoleName,
+			RoleImage: r.RoleImage,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": responseRoles})
 }
 
 // GetRole is the handler for fetching role details
@@ -289,14 +298,23 @@ func GetAllSkills(c *gin.Context) {
 	var skill service.Skill
 
 	// Get all skill details
-	response, err := skill.GetAll()
+	allSkills, err := skill.GetAll()
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the skill details -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": response})
+	responseSkills := make([]service.Skill, len(allSkills))
+	for index, r := range allSkills {
+		responseSkills[index] = service.Skill{
+			ID:         r.ID,
+			SkillName:  r.SkillName,
+			SkillImage: r.SkillImage,
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": responseSkills})
 }
 
 // GetSkill is the handler for fetching skill details
