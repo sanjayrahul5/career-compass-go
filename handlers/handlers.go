@@ -237,7 +237,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role}})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role, "username": user.Username, "email": user.Email}})
 }
 
 // GetAllRoles is the handler for fetching all the role details
