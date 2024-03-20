@@ -26,6 +26,8 @@ var (
 	SMTPPassword string
 
 	JWTSecret string
+
+	MLServerURL string
 )
 
 func init() {
@@ -49,4 +51,6 @@ func init() {
 	SMTPPassword = ViperConfig.GetString("SMTP_PASSWORD")
 
 	JWTSecret = ViperConfig.GetString("JWT_SECRET")
+
+	MLServerURL = ViperConfig.GetString("ML_SERVER_URL")
 }

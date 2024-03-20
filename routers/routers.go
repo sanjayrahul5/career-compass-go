@@ -14,10 +14,6 @@ func SetupRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(middlewares.Logger())
 
-	// Routes that require token verification
-	authRouter := router.Group("/")
-	authRouter.Use(middlewares.VerifyToken())
-
 	router.GET("/readyz", func(c *gin.Context) { c.Status(http.StatusOK) })
 	router.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
@@ -29,11 +25,18 @@ func SetupRouter() *gin.Engine {
 
 	router.POST("/signin", handlers.Login)
 
+	// Routes that require token verification
+	authRouter := router.Group("/")
+	authRouter.Use(middlewares.VerifyToken())
+
 	authRouter.GET("/role", handlers.GetAllRoles)
 	authRouter.GET("/:id/role", handlers.GetRole)
 
 	authRouter.GET("/skill", handlers.GetAllSkills)
 	authRouter.GET("/:id/skill", handlers.GetSkill)
+
+	// ML Routes
+	router.POST("/predict", handlers.Predict)
 
 	return router
 }

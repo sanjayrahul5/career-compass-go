@@ -25,6 +25,27 @@ type User struct {
 	ExpireAt time.Time          `bson:"expire_at,omitempty"`
 }
 
+// RatingsData hold the assessment ratings data with ordered fields of a user
+type RatingsData struct {
+	RateWebDev          int `json:"rate_webDev"`
+	RateInfraAutomation int `json:"rate_infraAutomation"`
+	RateMLAlgo          int `json:"rate_mlAlgo"`
+	RateUIUX            int `json:"rate_uiux"`
+	RateBlockchain      int `json:"rate_blockchain"`
+	RateAppDev          int `json:"rate_appDev"`
+	RateCloud           int `json:"rate_cloud"`
+	RateTesting         int `json:"rate_testing"`
+	RateDataAnalytics   int `json:"rate_dataAnalytics"`
+	RateEmbedded        int `json:"rate_embedded"`
+	RateAI              int `json:"rate_ai"`
+	RateCyber           int `json:"rate_cyber"`
+	RateARVR            int `json:"rate_arvr"`
+	RateCompArch        int `json:"rate_compArch"`
+	RateNetwork         int `json:"rate_network"`
+	RateProjectMan      int `json:"rate_projectMan"`
+	RateGame            int `json:"rate_game"`
+}
+
 // Create inserts a new user document
 func (us *User) Create() error {
 	res, err := config.UserCollection.InsertOne(context.TODO(), us)

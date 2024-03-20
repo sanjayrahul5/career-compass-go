@@ -7,6 +7,7 @@ import (
 	"career-compass-go/pkg/logging"
 	"career-compass-go/service"
 	"career-compass-go/utils"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -344,4 +345,46 @@ func GetSkill(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": skill})
+}
+
+// Predict is the handler to determine the user's suitable role based on their assessment ratings
+func Predict(c *gin.Context) {
+	var (
+		ratingsData service.RatingsData
+		predictResp map[string]any
+	)
+
+	userID := c.Query("userID")
+
+	err := c.ShouldBind(&ratingsData)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	res, err := utils.RestPost(fmt.Sprintf("%s/predict", config.MLServerURL), ratingsData)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error making predict api call to ML server -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer res.Body.Close()
+
+	err = json.NewDecoder(res.Body).Decode(&predictResp)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing response body -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if res.StatusCode != http.StatusOK {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error from ML engine -> %v", predictResp))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	} else {
+		logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Response from predict for user {%s} -> %s", userID, predictResp["prediction"].(string)))
+		c.JSON(http.StatusOK, gin.H{"data": predictResp})
+		return
+	}
 }

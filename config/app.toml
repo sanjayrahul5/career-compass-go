@@ -16,3 +16,5 @@ SMTP_EMAIL = "interxview@gmail.com"
 SMTP_PASSWORD = ""
 
 JWT_SECRET = ""
+
+ML_SERVER_URL = "https://mlcareercompass.azurewebsites.net"
