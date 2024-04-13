@@ -76,9 +76,9 @@ func RestPost(host string, reqData any) (*http.Response, error) {
 
 	req := &http.Request{
 		Method: http.MethodPost,
-		URL: reqURL,
+		URL:    reqURL,
 		Header: make(http.Header),
-		Body: reqBody,
+		Body:   reqBody,
 	}
 
 	req.Header.Set("Content-Type", "application/json")

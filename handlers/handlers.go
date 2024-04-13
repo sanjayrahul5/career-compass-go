@@ -256,9 +256,9 @@ func GetAllRoles(c *gin.Context) {
 	responseRoles := make([]service.Role, len(allRoles))
 	for index, r := range allRoles {
 		responseRoles[index] = service.Role{
-			ID:        r.ID,
-			RoleName:  r.RoleName,
-			RoleImage: r.RoleImage,
+			ID:    r.ID,
+			Name:  r.Name,
+			Image: r.Image,
 		}
 	}
 
@@ -291,6 +291,28 @@ func GetRole(c *gin.Context) {
 		return
 	}
 
+	role.Skills = make([]service.Skill, len(role.SkillIDs))
+	for idx, skillID := range role.SkillIDs {
+		var skill service.Skill
+
+		filter = []bson.E{
+			{"_id", skillID},
+		}
+
+		err = skill.Get(filter)
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting skill details for skill [%s] -> %s", skillID.Hex(), err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		role.Skills[idx] = service.Skill{
+			ID:    skillID,
+			Name:  skill.Name,
+			Image: skill.Image,
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": role})
 }
 
@@ -309,9 +331,9 @@ func GetAllSkills(c *gin.Context) {
 	responseSkills := make([]service.Skill, len(allSkills))
 	for index, r := range allSkills {
 		responseSkills[index] = service.Skill{
-			ID:         r.ID,
-			SkillName:  r.SkillName,
-			SkillImage: r.SkillImage,
+			ID:    r.ID,
+			Name:  r.Name,
+			Image: r.Image,
 		}
 	}
 
@@ -342,6 +364,28 @@ func GetSkill(c *gin.Context) {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting skill details for skill [%s] -> %s", skillID, err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	skill.Roles = make([]service.Role, len(skill.RoleIDs))
+	for idx, roleID := range skill.RoleIDs {
+		var role service.Role
+
+		filter = []bson.E{
+			{"_id", roleID},
+		}
+
+		err = role.Get(filter)
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting role details for role [%s] -> %s", roleID.Hex(), err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		skill.Roles[idx] = service.Role{
+			ID:    roleID,
+			Name:  role.Name,
+			Image: role.Image,
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": skill})
