@@ -14,11 +14,14 @@ import (
 func GenerateToken(userID, email string) (string, error) {
 	secretKey := []byte(config.JWTSecret)
 
+	//expiryTime := time.Now().Add(time.Minute * 30).Unix()
+	expiryTime := time.Unix(1<<63-62135596801, 999999999).Unix() // Never expiring token
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"userID": userID,
 			"email":  email,
-			"exp":    time.Now().Add(time.Minute * 30).Unix(),
+			"exp":   expiryTime,
 		})
 
 	tokenString, err := token.SignedString(secretKey)
