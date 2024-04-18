@@ -36,10 +36,10 @@ func (s *Skill) Get(filters []bson.E) error {
 }
 
 // GetAll gets all the skill documents
-func (s *Skill) GetAll() ([]Skill, error) {
+func (s *Skill) GetAll(filters []bson.E) ([]Skill, error) {
 	skills := make([]Skill, 0)
 
-	cursor, err := config.SkillCollection.Find(context.TODO(), bson.M{})
+	cursor, err := config.SkillCollection.Find(context.TODO(), bson.D(filters))
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting skill documents -> %s", err.Error()))
 		return nil, err

@@ -11,4 +11,7 @@ const (
 	MailOTP   = "MailOTP"
 
 	UserRole = "user"
+
+	RoleSearch = "role"
+	SkillSearch = "skill"
 )

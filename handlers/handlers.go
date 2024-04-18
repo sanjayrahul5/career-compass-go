@@ -246,7 +246,7 @@ func GetAllRoles(c *gin.Context) {
 	var role service.Role
 
 	// Get all role details
-	allRoles, err := role.GetAll()
+	allRoles, err := role.GetAll([]bson.E{})
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the role details -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -321,7 +321,7 @@ func GetAllSkills(c *gin.Context) {
 	var skill service.Skill
 
 	// Get all skill details
-	allSkills, err := skill.GetAll()
+	allSkills, err := skill.GetAll([]bson.E{})
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting all the skill details -> %s", err.Error()))
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -389,6 +389,73 @@ func GetSkill(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": skill})
+}
+
+// Search is the handler for role & skill search filters
+func Search(c *gin.Context) {
+	var resp interface{}
+
+	searchBy := c.Query("searchBy")
+	searchValue := c.Query("searchValue")
+
+	regexFilter := bson.E{
+		Key: "name",
+		Value: bson.D{
+			{"$regex", searchValue},
+			{"$options", "i"},
+		},
+	}
+
+	switch searchBy {
+	case config.RoleSearch:
+		var role service.Role
+
+		filteredRoles, err := role.GetAll([]bson.E{regexFilter})
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting filtered roles for search value [%s] -> %s", searchValue, err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		roleResp := make([]service.Role, len(filteredRoles))
+		for idx, r := range filteredRoles {
+			roleResp[idx] = service.Role{
+				ID: r.ID,
+				Name: r.Name,
+				Image: r.Image,
+			}
+		}
+
+		resp = roleResp
+
+	case config.SkillSearch:
+		var skill service.Skill
+
+		filteredSkills, err := skill.GetAll([]bson.E{regexFilter})
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting filtered skills for search value [%s] -> %s", searchValue, err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		skillResp := make([]service.Skill, len(filteredSkills))
+		for idx, s := range filteredSkills {
+			skillResp[idx] = service.Skill{
+				ID: s.ID,
+				Name: s.Name,
+				Image: s.Image,
+			}
+		}
+
+		resp = skillResp
+
+	default:
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Invalid searchBy value -> %s", searchBy))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid searchBy value"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": resp})
 }
 
 // Predict is the handler to determine the user's suitable role based on their assessment ratings

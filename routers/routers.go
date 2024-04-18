@@ -35,6 +35,8 @@ func SetupRouter() *gin.Engine {
 	authRouter.GET("/skill", handlers.GetAllSkills)
 	authRouter.GET("/:id/skill", handlers.GetSkill)
 
+	authRouter.GET("/search", handlers.Search)
+
 	// ML Routes
 	router.POST("/predict", handlers.Predict)
 

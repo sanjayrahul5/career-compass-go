@@ -33,10 +33,10 @@ func (r *Role) Get(filters []bson.E) error {
 }
 
 // GetAll gets all the role documents
-func (r *Role) GetAll() ([]Role, error) {
+func (r *Role) GetAll(filters []bson.E) ([]Role, error) {
 	roles := make([]Role, 0)
 
-	cursor, err := config.RoleCollection.Find(context.TODO(), bson.M{})
+	cursor, err := config.RoleCollection.Find(context.TODO(), bson.D(filters))
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting role documents -> %s", err.Error()))
 		return nil, err
