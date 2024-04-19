@@ -8,6 +8,8 @@ DB_NAME = "careerCompass"
 USER_COLLECTION = "users"
 ROLE_COLLECTION = "roles"
 SKILL_COLLECTION = "skills"
+QUESTION_COLLECTION = "questions"
+ANSWER_COLLECTION = "answers"
 
 
 SMTP_HOST = "smtp.gmail.com"

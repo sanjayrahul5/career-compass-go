@@ -17,6 +17,8 @@ var (
 	UserCollection  *mongo.Collection
 	RoleCollection  *mongo.Collection
 	SkillCollection *mongo.Collection
+	QuestionCollection *mongo.Collection
+	AnswerCollection *mongo.Collection
 
 	Templates *template.Template
 

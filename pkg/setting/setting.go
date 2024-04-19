@@ -32,6 +32,8 @@ func Setup() {
 	config.UserCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("USER_COLLECTION"))
 	config.RoleCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("ROLE_COLLECTION"))
 	config.SkillCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("SKILL_COLLECTION"))
+	config.QuestionCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("QUESTION_COLLECTION"))
+	config.AnswerCollection = config.MongoDBConn.Collection(config.ViperConfig.GetString("ANSWER_COLLECTION"))
 
 	go CreateTTLIndexForUsers()
 }

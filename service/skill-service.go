@@ -14,7 +14,7 @@ import (
 // Skill collection schema
 type Skill struct {
 	ID          primitive.ObjectID   `json:"skillID" bson:"_id,omitempty"`
-	RoleIDs     []primitive.ObjectID `json:"-" bson:"role_ids"`
+	RoleIDs     []primitive.ObjectID `json:"roleIDs,omitempty" bson:"role_ids"`
 	Name        string               `json:"name" bson:"name"`
 	Image       string               `json:"image" bson:"image"`
 	Description string               `json:"description,omitempty" bson:"description"`

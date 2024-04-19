@@ -37,6 +37,10 @@ func SetupRouter() *gin.Engine {
 
 	authRouter.GET("/search", handlers.Search)
 
+	authRouter.POST("/question", handlers.AddQuestion)
+
+	authRouter.POST("/answer", handlers.AddAnswer)
+
 	// ML Routes
 	router.POST("/predict", handlers.Predict)
 

@@ -313,6 +313,8 @@ func GetRole(c *gin.Context) {
 		}
 	}
 
+	role.SkillIDs = nil
+
 	c.JSON(http.StatusOK, gin.H{"data": role})
 }
 
@@ -388,6 +390,8 @@ func GetSkill(c *gin.Context) {
 		}
 	}
 
+	skill.RoleIDs = nil
+
 	c.JSON(http.StatusOK, gin.H{"data": skill})
 }
 
@@ -456,6 +460,104 @@ func Search(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": resp})
+}
+
+// AddQuestion is the handler to create new question for a skill
+func AddQuestion(c *gin.Context) {
+	var question service.Question
+
+	err := c.ShouldBind(&question)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	currTime := time.Now()
+
+	question.Status = config.QuestionUnresolved
+	question.Likes = 0
+	question.CreatedAt = currTime
+	question.UpdatedAt = currTime
+
+	question.UserID, err = primitive.ObjectIDFromHex(c.GetString("userID"))
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing userID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+
+	}
+
+	filters := []bson.E{
+		{"_id", question.UserID},
+	}
+
+	var user service.User
+	err = user.Get(filters)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting user details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	question.UserName = user.Username
+
+	err = question.Add()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating question details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"questionID": question.ID}})
+}
+
+// AddAnswer is the handler to add new answer to a question
+func AddAnswer(c *gin.Context) {
+	var answer service.Answer
+
+	err := c.ShouldBind(&answer)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	currTime := time.Now()
+
+	answer.CreatedAt = currTime
+	answer.UpdatedAt = currTime
+
+	answer.UserID, err = primitive.ObjectIDFromHex(c.GetString("userID"))
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing userID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+
+	}
+
+	filters := []bson.E{
+		{"_id", answer.UserID},
+	}
+
+	var user service.User
+	err = user.Get(filters)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting user details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	answer.UserName = user.Username
+
+	err = answer.Add()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating answer details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"questionID": answer.ID}})
 }
 
 // Predict is the handler to determine the user's suitable role based on their assessment ratings
