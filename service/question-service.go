@@ -6,6 +6,7 @@ import (
 	"career-compass-go/utils"
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"runtime"
 	"time"
@@ -36,6 +37,17 @@ func (qu *Question) Add() error {
 
 	qu.ID = res.InsertedID.(primitive.ObjectID)
 	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created questionID -> %s", qu.ID.Hex()))
+
+	return nil
+}
+
+// Update updates fields of a specific question
+func (qu *Question) Update(questionID primitive.ObjectID, update bson.D) error {
+	_, err := config.QuestionCollection.UpdateByID(context.Background(), questionID, update)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error updating question [%s] -> %s", questionID.Hex(), err.Error()))
+		return err
+	}
 
 	return nil
 }

@@ -512,6 +512,43 @@ func AddQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"questionID": question.ID}})
 }
 
+// UpdateQuestion is the handler to update question
+func UpdateQuestion(c *gin.Context) {
+	var (
+		questionID = c.Param("id")
+		status     = c.Query("status")
+	)
+
+	if status != config.QuestionUnresolved && status != config.QuestionResolved {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Invalid status input recieved -> %s", status))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid status input"})
+		return
+	}
+
+	questionObjectID, err := primitive.ObjectIDFromHex(questionID)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing questionID to object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	updateFields := bson.D{
+		{"$set", bson.D{
+			{"status", status},
+		}},
+	}
+
+	var question service.Question
+	err = question.Update(questionObjectID, updateFields)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error updating question details -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "Question updated successfully"})
+}
+
 // AddAnswer is the handler to add new answer to a question
 func AddAnswer(c *gin.Context) {
 	var answer service.Answer
