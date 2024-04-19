@@ -6,6 +6,7 @@ import (
 	"career-compass-go/utils"
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"runtime"
 	"time"
@@ -34,4 +35,23 @@ func (an *Answer) Add() error {
 	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created answerID -> %s", an.ID.Hex()))
 
 	return nil
+}
+
+// GetAll gets the answer documents
+func (an *Answer) GetAll(filters []bson.E) ([]Answer, error) {
+	answers := make([]Answer, 0)
+
+	cursor, err := config.AnswerCollection.Find(context.TODO(), bson.D(filters))
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error fetching answer documents -> %s", err.Error()))
+		return nil, err
+	}
+
+	err = cursor.All(context.TODO(), &answers)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error decoding answer documents from cursor -> %s", err.Error()))
+		return nil, err
+	}
+
+	return answers, nil
 }

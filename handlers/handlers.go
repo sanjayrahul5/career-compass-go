@@ -512,6 +512,47 @@ func AddQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"questionID": question.ID}})
 }
 
+// GetQuestions is the handler for fetching questions with answers for a skill
+func GetQuestions(c *gin.Context) {
+	skillID := c.Param("id")
+	resp := make([]service.Question, 0)
+
+	skillIDObject, err := primitive.ObjectIDFromHex(skillID)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing skillID into object -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	filters := []bson.E{
+		{"skill_id", skillIDObject},
+	}
+
+	var question service.Question
+	resp, err = question.GetAll(filters)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting question documents for skill [%s] -> %s", skillID, err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for idx, ques := range resp {
+		filters = []bson.E{
+			{"question_id", ques.ID},
+		}
+
+		var ans service.Answer
+		resp[idx].Answers, err = ans.GetAll(filters)
+		if err != nil {
+			logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error getting answer documents for question [%s] -> %s", ques.ID.Hex(), err.Error()))
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": resp})
+}
+
 // UpdateQuestion is the handler to update question
 func UpdateQuestion(c *gin.Context) {
 	var (

@@ -25,6 +25,7 @@ type Question struct {
 	UpvoteBy  []primitive.ObjectID `json:"upvoteBy" bson:"upvote_by"`
 	CreatedAt time.Time            `json:"createdAt" bson:"created_at"`
 	UpdatedAt time.Time            `json:"updatedAt" bson:"updated_at"`
+	Answers   []Answer             `json:"answers,omitempty" bson:"-"`
 }
 
 // Add inserts a question document
@@ -41,9 +42,28 @@ func (qu *Question) Add() error {
 	return nil
 }
 
+// GetAll gets the question documents
+func (qu *Question) GetAll(filters []bson.E) ([]Question, error) {
+	questions := make([]Question, 0)
+
+	cursor, err := config.QuestionCollection.Find(context.TODO(), bson.D(filters))
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error fetching question documents -> %s", err.Error()))
+		return nil, err
+	}
+
+	err = cursor.All(context.TODO(), &questions)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error decoding question documents from cursor -> %s", err.Error()))
+		return nil, err
+	}
+
+	return questions, nil
+}
+
 // Update updates fields of a specific question
 func (qu *Question) Update(questionID primitive.ObjectID, update bson.D) error {
-	_, err := config.QuestionCollection.UpdateByID(context.Background(), questionID, update)
+	_, err := config.QuestionCollection.UpdateByID(context.TODO(), questionID, update)
 	if err != nil {
 		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error updating question [%s] -> %s", questionID.Hex(), err.Error()))
 		return err
