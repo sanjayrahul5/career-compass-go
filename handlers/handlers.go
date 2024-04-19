@@ -424,8 +424,8 @@ func Search(c *gin.Context) {
 		roleResp := make([]service.Role, len(filteredRoles))
 		for idx, r := range filteredRoles {
 			roleResp[idx] = service.Role{
-				ID: r.ID,
-				Name: r.Name,
+				ID:    r.ID,
+				Name:  r.Name,
 				Image: r.Image,
 			}
 		}
@@ -445,8 +445,8 @@ func Search(c *gin.Context) {
 		skillResp := make([]service.Skill, len(filteredSkills))
 		for idx, s := range filteredSkills {
 			skillResp[idx] = service.Skill{
-				ID: s.ID,
-				Name: s.Name,
+				ID:    s.ID,
+				Name:  s.Name,
 				Image: s.Image,
 			}
 		}
@@ -476,7 +476,7 @@ func AddQuestion(c *gin.Context) {
 	currTime := time.Now()
 
 	question.Status = config.QuestionUnresolved
-	question.Likes = 0
+	question.Upvote = 0
 	question.CreatedAt = currTime
 	question.UpdatedAt = currTime
 
@@ -557,7 +557,7 @@ func AddAnswer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"questionID": answer.ID}})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"answerID": answer.ID}})
 }
 
 // Predict is the handler to determine the user's suitable role based on their assessment ratings

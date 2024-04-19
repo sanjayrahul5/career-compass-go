@@ -12,9 +12,9 @@ const (
 
 	UserRole = "user"
 
-	RoleSearch = "role"
+	RoleSearch  = "role"
 	SkillSearch = "skill"
 
 	QuestionUnresolved = "Unresolved"
-	QuestionResolved = "Resolved"
+	QuestionResolved   = "Resolved"
 )

@@ -21,7 +21,7 @@ func GenerateToken(userID, email string) (string, error) {
 		jwt.MapClaims{
 			"userID": userID,
 			"email":  email,
-			"exp":   expiryTime,
+			"exp":    expiryTime,
 		})
 
 	tokenString, err := token.SignedString(secretKey)

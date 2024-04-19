@@ -20,8 +20,8 @@ type Question struct {
 	Status    string               `json:"status" bson:"status"`
 	UserID    primitive.ObjectID   `json:"userID" bson:"user_id"`
 	UserName  string               `json:"userName" bson:"user_name"`
-	Likes     int64                `json:"likes" bson:"likes"`
-	LikedBy   []primitive.ObjectID `json:"likedBy" bson:"liked_by"`
+	Upvote    int64                `json:"upvote" bson:"upvote"`
+	UpvoteBy  []primitive.ObjectID `json:"upvoteBy" bson:"upvote_by"`
 	CreatedAt time.Time            `json:"createdAt" bson:"created_at"`
 	UpdatedAt time.Time            `json:"updatedAt" bson:"updated_at"`
 }

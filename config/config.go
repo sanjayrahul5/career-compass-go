@@ -11,14 +11,14 @@ import (
 var (
 	ViperConfig *viper.Viper
 
-	MongoClient     *mongo.Client
-	MongoDBName     string
-	MongoDBConn     *mongo.Database
-	UserCollection  *mongo.Collection
-	RoleCollection  *mongo.Collection
-	SkillCollection *mongo.Collection
+	MongoClient        *mongo.Client
+	MongoDBName        string
+	MongoDBConn        *mongo.Database
+	UserCollection     *mongo.Collection
+	RoleCollection     *mongo.Collection
+	SkillCollection    *mongo.Collection
 	QuestionCollection *mongo.Collection
-	AnswerCollection *mongo.Collection
+	AnswerCollection   *mongo.Collection
 
 	Templates *template.Template
 
