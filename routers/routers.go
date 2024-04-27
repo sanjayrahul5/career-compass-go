@@ -29,9 +29,11 @@ func SetupRouter() *gin.Engine {
 	authRouter := router.Group("/")
 	authRouter.Use(middlewares.VerifyToken())
 
+	router.POST("/role", handlers.CreateRole)
 	authRouter.GET("/role", handlers.GetAllRoles)
 	authRouter.GET("/:id/role", handlers.GetRole)
 
+	router.POST("/skill", handlers.CreateSkill)
 	authRouter.GET("/skill", handlers.GetAllSkills)
 	authRouter.GET("/:id/skill", handlers.GetSkill)
 

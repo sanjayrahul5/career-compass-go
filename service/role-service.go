@@ -18,7 +18,21 @@ type Role struct {
 	Name        string               `json:"name" bson:"name"`
 	Image       string               `json:"image" bson:"image"`
 	Description string               `json:"description,omitempty" bson:"description"`
-	Skills      []Skill              `json:"skills,omitempty"`
+	Skills      []Skill              `json:"skills,omitempty" bson:"-"`
+}
+
+// Create inserts a new role document
+func (r *Role) Create() error {
+	res, err := config.RoleCollection.InsertOne(context.TODO(), r)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error inserting role user document -> %s", err.Error()))
+		return err
+	}
+
+	r.ID = res.InsertedID.(primitive.ObjectID)
+	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created roleID -> %s", r.ID.Hex()))
+
+	return nil
 }
 
 // Get gets the role document based on the given filter

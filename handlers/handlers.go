@@ -241,6 +241,27 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role, "username": user.Username, "email": user.Email}})
 }
 
+// CreateRole is the handler for creating new role entry
+func CreateRole(c *gin.Context) {
+	var role service.Role
+
+	err := c.ShouldBind(&role)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = role.Create()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating role document -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"roleID": role.ID}})
+}
+
 // GetAllRoles is the handler for fetching all the role details
 func GetAllRoles(c *gin.Context) {
 	var role service.Role
@@ -316,6 +337,27 @@ func GetRole(c *gin.Context) {
 	role.SkillIDs = nil
 
 	c.JSON(http.StatusOK, gin.H{"data": role})
+}
+
+// CreateSkill is the handler for creating new skill entry
+func CreateSkill(c *gin.Context) {
+	var skill service.Skill
+
+	err := c.ShouldBind(&skill)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error parsing the request body -> %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = skill.Create()
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error creating skill document -> %s", err.Error()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"skillID": skill.ID}})
 }
 
 // GetAllSkills is the handler for fetching all the skill details

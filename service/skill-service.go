@@ -21,7 +21,21 @@ type Skill struct {
 	Youtube     []string             `json:"youtube,omitempty" bson:"youtube"`
 	Website     []string             `json:"website,omitempty" bson:"website"`
 	Courses     []string             `json:"courses,omitempty" bson:"courses"`
-	Roles       []Role               `json:"roles,omitempty"`
+	Roles       []Role               `json:"roles,omitempty" bson:"-"`
+}
+
+// Create inserts a new skill document
+func (s *Skill) Create() error {
+	res, err := config.SkillCollection.InsertOne(context.TODO(), s)
+	if err != nil {
+		logging.Logger.Error(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Error inserting new skill document -> %s", err.Error()))
+		return err
+	}
+
+	s.ID = res.InsertedID.(primitive.ObjectID)
+	logging.Logger.Info(utils.GetFrame(runtime.Caller(0)), fmt.Sprintf("Created skillID -> %s", s.ID.Hex()))
+
+	return nil
 }
 
 // Get gets the skill document based on the given filter
