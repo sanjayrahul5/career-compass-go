@@ -238,7 +238,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role, "username": user.Username, "email": user.Email}})
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"token": token, "role": user.Role, "userID": user.ID, "username": user.Username, "email": user.Email}})
 }
 
 // CreateRole is the handler for creating new role entry
