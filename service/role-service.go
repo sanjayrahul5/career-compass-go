@@ -18,7 +18,16 @@ type Role struct {
 	Name        string               `json:"name" bson:"name"`
 	Image       string               `json:"image" bson:"image"`
 	Description string               `json:"description,omitempty" bson:"description"`
+	Salary      string               `json:"salary,omitempty" bson:"salary"`
+	Duties      []string             `json:"duties,omitempty" bson:"duties"`
+	Companies   []Company            `json:"companies,omitempty" bson:"companies"`
 	Skills      []Skill              `json:"skills,omitempty" bson:"-"`
+}
+
+type Company struct {
+	Name  string `json:"name,omitempty" bson:"name"`
+	Image string `json:"image,omitempty" bson:"image"`
+	Link  string `json:"link,omitempty" bson:"link"`
 }
 
 // Create inserts a new role document
