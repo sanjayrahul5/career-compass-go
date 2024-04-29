@@ -14,7 +14,7 @@ ANSWER_COLLECTION = "answers"
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_EMAIL = "interxview@gmail.com"
+SMTP_EMAIL = "careercompass.noreply@gmail.com"
 SMTP_PASSWORD = ""
 
 JWT_SECRET = ""
